@@ -28,6 +28,7 @@ func (b *Broker) Config() *Config {
 	return b.config
 }
 
+// ctx context.Context is needed to know where an error happened (Because we will be having a lot of go routines)
 func NewServer(ctx context.Context, config *Config) (*Broker, error) {
 	if config.Port == "" {
 		return nil, errors.New("port is required")
@@ -55,5 +56,5 @@ func (b *Broker) Start(binder func (s Server, r *mux.Router)) {
 	log.Println("Starting server on port", b.Config().Port)
 	if err := http.ListenAndServe(b.config.Port, b.router); err != nil {
 		log.Fatal("ListenAndServe:", err)
-	}
+	} 
 }
