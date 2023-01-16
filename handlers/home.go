@@ -9,7 +9,7 @@ import (
 
 type HomeResponse struct {
 	Message string `json:"message"`
-	Status bool `json:"status"`
+	Status  bool   `json:"status"`
 }
 
 func HomeHandler(s server.Server) http.HandlerFunc {
@@ -18,7 +18,7 @@ func HomeHandler(s server.Server) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(HomeResponse{
 			Message: "Welcome to Platzi Go",
-			Status: true,
+			Status:  true,
 		})
 	}
 }
