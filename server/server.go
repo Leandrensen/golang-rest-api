@@ -3,6 +3,8 @@ package server
 import (
 	"context"
 	"errors"
+	"golang-rest-api-websockets/database"
+	"golang-rest-api-websockets/repository"
 	"log"
 	"net/http"
 
@@ -55,6 +57,11 @@ func (b *Broker) Start(binder func(s Server, r *mux.Router)) {
 	// ^^^ It creates again the router that was created on line 47
 	// I belive it's an error
 	binder(b, b.router)
+	repo, err := database.NewPostgresrepository(b.config.DatabaseURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	repository.SetRepository(repo)
 	log.Println("Starting server on port", b.Config().Port)
 	if err := http.ListenAndServe(b.config.Port, b.router); err != nil {
 		log.Fatal("ListenAndServe:", err)
