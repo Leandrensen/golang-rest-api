@@ -23,8 +23,6 @@ type SignUpResponse struct {
 }
 
 func SignUpHandler(s server.Server) http.HandlerFunc {
-	fmt.Println(`SignUpHanlder`)
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request = SignUpRequest{}
 		err := json.NewDecoder(r.Body).Decode(&request)
