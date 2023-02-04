@@ -25,7 +25,7 @@ func NewPostgresrepository(url string) (*PostgresRepository, error) {
 }
 
 func (repo *PostgresRepository) InsertUser(ctx context.Context, user *models.User) error {
-	_, err := repo.db.ExecContext(ctx, "INSERT INTO users (id, email, password) VALUES ($1, $2, $3)", user.Id, user.Password, user.Email)
+	_, err := repo.db.ExecContext(ctx, "INSERT INTO users (id, email, password) VALUES ($1, $2, $3)", user.Id, user.Email, user.Password)
 	if err != nil {
 		return err
 	}
@@ -55,6 +55,32 @@ func (repo *PostgresRepository) GetUserById(ctx context.Context, id string) (*mo
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+
+	return &user, nil
+}
+
+func (repo *PostgresRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+	rows, err := repo.db.QueryContext(ctx, "SELECT id, email, password FROM users WHERE email = $1", email)
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}() // <--- this () means that we are executing the anonymous function (func(){})
+
+	user := models.User{}
+	for rows.Next() {
+		log.Println("rows.Next()")
+		if err = rows.Scan(&user.Id, &user.Email, &user.Password); err == nil {
+			// log.Println(&user)
+			return &user, nil
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	log.Println(&user)
 
 	return &user, nil
 }
