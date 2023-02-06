@@ -85,6 +85,51 @@ func (repo *PostgresRepository) GetUserByEmail(ctx context.Context, email string
 	return &user, nil
 }
 
+func (repo *PostgresRepository) InsertPost(ctx context.Context, post *models.Post) error {
+	_, err := repo.db.ExecContext(ctx, "INSERT INTO posts (id, post_content, user_id) VALUES ($1, $2, $3)", post.Id, post.PostContent, post.UserId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *PostgresRepository) GetPostById(ctx context.Context, id string) (*models.Post, error) {
+	rows, err := repo.db.QueryContext(ctx, "SELECT post_content, created_at, user_id FROM posts WHERE id = $1", id)
+
+	//defer behind a function, tells us that this is a function
+	// that will execute after the whole function (GetUserById) ends
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}() // <--- this () means that we are executing the anonymous function (func(){})
+
+	post := models.Post{}
+	for rows.Next() {
+		if err = rows.Scan(&post.PostContent, &post.CreatedAt, &post.UserId); err == nil {
+			return &post, nil
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &post, nil
+}
+
+func (repo *PostgresRepository) UpdatePost(ctx context.Context, post *models.Post) error {
+	_, err := repo.db.ExecContext(ctx, "UPDATE posts SET post_content = $1 WHERE id = $2 and user_id = $3", post.PostContent, post.Id, post.UserId)
+	return err
+}
+
+func (repo *PostgresRepository) DeletePost(ctx context.Context, id string, userId string) error {
+	_, err := repo.db.ExecContext(ctx, "DELETE FROM posts WHERE id = $1 and user_id = $2", id, userId)
+	return err
+}
+
 func (repo *PostgresRepository) Close() error {
 	return repo.db.Close()
 }
