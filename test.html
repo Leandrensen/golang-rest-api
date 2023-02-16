@@ -1,0 +1,26 @@
+<html>
+  <body>
+    <h1>Post Application Tester</h1>
+  </body>
+  <script>
+    fetch('http://localhost:5050/posts', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then((response) => response.json())
+      .then((json) => {
+        console.log(json);
+      });
+
+    var ws = new WebSocket('ws://localhost:5050/ws');
+    ws.onopen = () => {
+      console.log('Connected to websocket');
+    };
+    ws.onmessage = (event) => {
+      console.log(event.data);
+    };
+    ws.onerror = (event) => {
+      console.log('Error: ' + event.data);
+    };
+  </script>
+</html>
